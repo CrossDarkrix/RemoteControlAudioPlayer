@@ -257,7 +257,7 @@ class MultipeerConnectivity():
             p.stop()
             self.send(b'FStop')
         elif message == b'FStop':
-            print('Stopping.......')
+            _print('Stopping.......')
             p = sound.Player(MusicPath[0])
             MusicParent[0] = p
             p.stop()
