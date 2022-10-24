@@ -13,4 +13,6 @@ bluetooth), without going through some server.
 
 ## Usage
 
-run ```multipeer.py```
+run ```multipeer.py```.
+
+add M4A files to ```$HOME/InputAudioFiles```.
