@@ -1,159 +1,12 @@
-# -*- coding: utf-8 -*-
-
-"""
-Multipeer connectivity for the Pythonista iOS app
-
-# Multipeer
-
-This is a [Pythonista](http://omz-software.com/pythonista/) wrapper around iOS
-[Multipeer Connectivity](https://developer.apple.com/documentation
-/multipeerconnectivity?language=objc).
-
-Multipeer connectivity allows you to find and exchange information between
-2-8 iOS and Mac devices in the same network neighborhood (same wifi or
-bluetooth), without going through some server.
-
-Sample use cases include games, chats, file exchange (like AirDrop) and so on.
-
-## Installation
-
-Copy the `multipeer.py` file from Github to your site-packages, or just:
-  
-    pip install pythonista-multipeer
-    
-in [Stash](https://github.com/ywangd/stash).
-
-## Usage
-
-Here's a minimal usage example, a line-based chat. You need to be running
-the same code on all devices participating in the chat.
-
-    import multipeer
-
-    my_name = input('Name: ')
-
-    mc = multipeer.MultipeerConnectivity(display_name=my_name,
-      service_type='chat')
-
-    try:
-      while True:
-        chat_message = input('Message: ')
-        mc.send(chat_message)
-    finally:
-      mc.end_all()
-
-This example is functional, even though the prompts and incoming messages
-tend to get mixed up. You can try it out by running the `multipeer.py` file.
-There is also a cleaner Pythonista UI version of the chat in `multipeer_chat`.
-
-Here are the things to note when starting to use this library:
-
-## Peer-to-peer, not client-server
-
-This wrapper around the MC framework makes no assumptions regarding the
-relationships between peers. If you need client-server roles, you can build
-them on top.
-
-## Expected usage
-
-1. Create a subclass of `MultipeerCommunications` to handle messages from
-the framework (see separate topic, below).
-2. Instantiate the subclass with your service type, peer display name and
-optional initial context data (see the class description).
-3. Wait for peers to connect (see the `peer_added` and `get_peers` methods).
-4. Optionally, have each participating peer stop accepting further peers,
-e.g. for the duration of a game (see the `stop_looking_for_peers` method).
-5. Send and receive messages (see a separate topic, below).
-6. Potentially react to additions and removal of peers.
-7. Optionally, start accepting peers again, e.g. after a previous
-game ends (see the `start_looking_for_peers` method).
-8. Before your app exits, call the `end_all` method to make sure there are
-no lingering connections.
-
-## What's in a message?
-
-Messages passed between peers are UTF-8 encoded text. This wrapper
-JSON-serializes the message you give to the `send` method (probably a str or
-a dict), then encodes it in bytes. Receiving peers reconstitute the message
-and pass it to the `receive` callback.
-
-## Streaming
-
-There are methods to use streaming instead of simple messages. Streamed data
-is received in 1024 byte chunks. There is a constructor option
-`initialize_streams` that can be used to set up a stream with each connected
-peer; otherwise, the streams are initialized when needed.
-
-## Performance
-
-Pythonista forum user `mithrendal` ran some ping tests with very small data
-payload and 1000 repeats. Observed average times for a two-way messages were:
-
-* 11.85 ms - `send` method with `reliable=False`
-* 11.94 ms - `send` method with `reliable=True` (the default)
-* 6.19 ms - `stream` method
-
-Tentative conclusions from these results:
-
-* Connections are likely to be good enough that reliable messaging is not a
-performance concern.
-* Streaming may be significantly better if
-communications delay is an issue.
-
-## What is a peer ID?
-
-Peer IDs passed around by the wrapper have a `display_name` member that
-gives you the display name of that peer. There is no guarantee that these
-names are unique between peers.
-
-The IDs act also as identifier objects for specific peers, and can be used
-to `send` messages to individual peers.
-
-You cannot create peer IDs for remote peers manually.
-
-## Why do I need to subclass?
-
-This wrapper chooses to handle callbacks via subclassing rather than
-requiring a separate delegate class. Subclass should define the following
-methods; see the API for the method signatures:
-
-* `peer_added`
-* `peer_removed`
-* `receive`
-* `stream_receive`
-
-The versions of these methods in the `MultipeerConnectivity` class just
-print out the information received.
-
-Note that if these method update the UI, you should decorate them with
-`objc_util.on_main_thread`.
-
-## Additional details
-
-* This implementation uses automatic invite of all peer◊s (until you call
-`stop_looking_for_peers`). Future version may include a callback for making
-decisions on which peers to accept.
-* Related to the previous point, including discovery info while browsing for
-peers is not currently supported.
-* Also, there is no way to explicitly kick a specific peer out of a session.
-This seems to be a limitation of the Apple framework.
-* Following defaults are used and are not currently configurable without
-resorting to ObjC:
-* Secure - Encryption is required on all connections.
-* Not secure - A specific security identity cannot be set.
-
-## Version history
-
-* 1.0 - first version submitted to PyPi
-* 0.9 - first functional version
-"""
-
-__version__ = '1.0.1'
-
+import ui, sound, ctypes, re, json, heapq, base64, os, time, sys, platform
 from objc_util import *
-import ctypes, re, json, heapq
 
-# MC framework classes
+listFiles = []
+listDirs = []
+mDirName = []
+MusicPath = ['']
+MusicParent = ['']
+UIs = base64.b64decode("WwogIHsKICAgICJub2RlcyIgOiBbCiAgICAgIHsKICAgICAgICAibm9kZXMiIDogWwoKICAgICAgICBdLAogICAgICAgICJmcmFtZSIgOiAie3syMSwgNn0sIHszMjUsIDM5MH19IiwKICAgICAgICAiY2xhc3MiIDogIlRhYmxlVmlldyIsCiAgICAgICAgImF0dHJpYnV0ZXMiIDogewogICAgICAgICAgInV1aWQiIDogIjk5ODk3RDJDLTYwOTMtNEU4Qy1CQkE4LTQ5MzFFNDAxQTZGRiIsCiAgICAgICAgICAiZGF0YV9zb3VyY2VfYWN0aW9uIiA6ICJTZWxlY3RGaWxlIiwKICAgICAgICAgICJiYWNrZ3JvdW5kX2NvbG9yIiA6ICJSR0JBKDAuMTI5MzA4LDAuMTI5MzA4LDAuMTI5MzA4LDEuMDAwMDAwKSIsCiAgICAgICAgICAiZnJhbWUiIDogInt7ODMsIDE4M30sIHsyMDAsIDIwMH19IiwKICAgICAgICAgICJkYXRhX3NvdXJjZV9pdGVtcyIgOiAiIiwKICAgICAgICAgICJ0aW50X2NvbG9yIiA6ICJSR0JBKDEuMDAwMDAwLDAuMDMxMjUwLDAuMDMxMjUwLDEuMDAwMDAwKSIsCiAgICAgICAgICAiZGF0YV9zb3VyY2VfbnVtYmVyX29mX2xpbmVzIiA6IDEsCiAgICAgICAgICAiZGF0YV9zb3VyY2VfZGVsZXRlX2VuYWJsZWQiIDogZmFsc2UsCiAgICAgICAgICAiZGF0YV9zb3VyY2VfZm9udF9zaXplIiA6IDE4LAogICAgICAgICAgInJvd19oZWlnaHQiIDogNDQsCiAgICAgICAgICAiY2xhc3MiIDogIlRhYmxlVmlldyIsCiAgICAgICAgICAibmFtZSIgOiAiTXVzaWNMaXN0IiwKICAgICAgICAgICJmbGV4IiA6ICJMUlRCIgogICAgICAgIH0sCiAgICAgICAgInNlbGVjdGVkIiA6IGZhbHNlCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibm9kZXMiIDogWwoKICAgICAgICBdLAogICAgICAgICJmcmFtZSIgOiAie3syMSwgMzg5fSwgezMyNSwgNDd9fSIsCiAgICAgICAgImNsYXNzIiA6ICJUZXh0VmlldyIsCiAgICAgICAgImF0dHJpYnV0ZXMiIDogewogICAgICAgICAgInV1aWQiIDogIjk1QjAzNEY1LTIwOTItNDBFQS04MjU5LTNFMjU1RjM4ODMyNiIsCiAgICAgICAgICAiZm9udF9zaXplIiA6IDE3LAogICAgICAgICAgImNvcm5lcl9yYWRpdXMiIDogMSwKICAgICAgICAgICJiYWNrZ3JvdW5kX2NvbG9yIiA6ICJSR0JBKDAuMDg2MDY4LDAuMDg2MDY4LDAuMDg2MDY4LDEuMDAwMDAwKSIsCiAgICAgICAgICAiZnJhbWUiIDogInt7ODMsIDE4M30sIHsyMDAsIDIwMH19IiwKICAgICAgICAgICJib3JkZXJfY29sb3IiIDogIlJHQkEoMC4wMDAwMDAsMC4wMDAwMDAsMC4wMDAwMDAsMS4wMDAwMDApIiwKICAgICAgICAgICJlZGl0YWJsZSIgOiBmYWxzZSwKICAgICAgICAgICJib3JkZXJfd2lkdGgiIDogMSwKICAgICAgICAgICJ0aW50X2NvbG9yIiA6ICJSR0JBKDEuMDAwMDAwLDAuMDMxMjUwLDAuMDMxMjUwLDEuMDAwMDAwKSIsCiAgICAgICAgICAiYWxpZ25tZW50IiA6ICJsZWZ0IiwKICAgICAgICAgICJhdXRvY29ycmVjdGlvbl90eXBlIiA6ICJkZWZhdWx0IiwKICAgICAgICAgICJhbHBoYSIgOiAxLAogICAgICAgICAgInRleHRfY29sb3IiIDogIlJHQkEoMS4wMDAwMDAsMC4wMzEyNTAsMC4wMzEyNTAsMS4wMDAwMDApIiwKICAgICAgICAgICJmb250X25hbWUiIDogIjxTeXN0ZW0+IiwKICAgICAgICAgICJzcGVsbGNoZWNraW5nX3R5cGUiIDogImRlZmF1bHQiLAogICAgICAgICAgImNsYXNzIiA6ICJUZXh0VmlldyIsCiAgICAgICAgICAibmFtZSIgOiAiRGVidWdMb2dBcmVhIiwKICAgICAgICAgICJmbGV4IiA6ICJMUlRCIgogICAgICAgIH0sCiAgICAgICAgInNlbGVjdGVkIiA6IGZhbHNlCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibm9kZXMiIDogWwoKICAgICAgICBdLAogICAgICAgICJmcmFtZSIgOiAie3syMSwgNDQ0fSwgezMyNSwgMzJ9fSIsCiAgICAgICAgImNsYXNzIiA6ICJUZXh0RmllbGQiLAogICAgICAgICJhdHRyaWJ1dGVzIiA6IHsKICAgICAgICAgICJ1dWlkIiA6ICJEMTM4QjIxMy1FRkQ2LTQ2NEItQTVDNi0xQ0ZDNjFDMzYxM0MiLAogICAgICAgICAgImZvbnRfc2l6ZSIgOiAxNywKICAgICAgICAgICJiYWNrZ3JvdW5kX2NvbG9yIiA6ICJSR0JBKDAuMTMwNTA5LDAuMTMwNTA5LDAuMTMwNTA5LDEuMDAwMDAwKSIsCiAgICAgICAgICAiZnJhbWUiIDogInt7ODMsIDI4NH0sIHsyMDAsIDMyfX0iLAogICAgICAgICAgInRpbnRfY29sb3IiIDogIlJHQkEoMS4wMDAwMDAsMC4wMzEyNTAsMC4wMzEyNTAsMS4wMDAwMDApIiwKICAgICAgICAgICJhbGlnbm1lbnQiIDogImxlZnQiLAogICAgICAgICAgImF1dG9jb3JyZWN0aW9uX3R5cGUiIDogImRlZmF1bHQiLAogICAgICAgICAgInRleHQiIDogIlVua25vd0RldmljZSIsCiAgICAgICAgICAicGxhY2Vob2xkZXIiIDogIkRldmljZSBOYW1lIiwKICAgICAgICAgICJ0ZXh0X2NvbG9yIiA6ICJSR0JBKDEuMDAwMDAwLDAuMDMxMjUwLDAuMDMxMjUwLDEuMDAwMDAwKSIsCiAgICAgICAgICAiZm9udF9uYW1lIiA6ICI8U3lzdGVtPiIsCiAgICAgICAgICAic3BlbGxjaGVja2luZ190eXBlIiA6ICJkZWZhdWx0IiwKICAgICAgICAgICJjbGFzcyIgOiAiVGV4dEZpZWxkIiwKICAgICAgICAgICJuYW1lIiA6ICJEZXZpY2VOYW1lIiwKICAgICAgICAgICJmbGV4IiA6ICJMUlRCIgogICAgICAgIH0sCiAgICAgICAgInNlbGVjdGVkIiA6IHRydWUKICAgICAgfSwKICAgICAgewogICAgICAgICJub2RlcyIgOiBbCgogICAgICAgIF0sCiAgICAgICAgImZyYW1lIiA6ICJ7ezI1NSwgNDg0fSwgezgwLCA4NH19IiwKICAgICAgICAiY2xhc3MiIDogIkJ1dHRvbiIsCiAgICAgICAgImF0dHJpYnV0ZXMiIDogewogICAgICAgICAgImZsZXgiIDogIkxSVEIiLAogICAgICAgICAgImFjdGlvbiIgOiAiTXVzaWNTdG9wIiwKICAgICAgICAgICJpbWFnZV9uYW1lIiA6ICJpb2I6c3RvcF8yNTYiLAogICAgICAgICAgImZyYW1lIiA6ICJ7ezE0MywgMjg0fSwgezgwLCAzMn19IiwKICAgICAgICAgICJ0aXRsZSIgOiAiIiwKICAgICAgICAgICJ1dWlkIiA6ICJGNTE1M0FBOS02Q0VDLTREOTMtOTYyMy1DREU2QTg3MTM2OTEiLAogICAgICAgICAgImNsYXNzIiA6ICJCdXR0b24iLAogICAgICAgICAgImZvbnRfc2l6ZSIgOiAxNSwKICAgICAgICAgICJuYW1lIiA6ICJTdG9wIgogICAgICAgIH0sCiAgICAgICAgInNlbGVjdGVkIiA6IGZhbHNlCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibm9kZXMiIDogWwoKICAgICAgICBdLAogICAgICAgICJmcmFtZSIgOiAie3s4MywgNDg0fSwgezgwLCA4NH19IiwKICAgICAgICAiY2xhc3MiIDogIkJ1dHRvbiIsCiAgICAgICAgImF0dHJpYnV0ZXMiIDogewogICAgICAgICAgImZsZXgiIDogIkxSVEIiLAogICAgICAgICAgImFjdGlvbiIgOiAiUGxheSIsCiAgICAgICAgICAibmFtZSIgOiAiUGxheSIsCiAgICAgICAgICAiZnJhbWUiIDogInt7MTQzLCAyODR9LCB7ODAsIDMyfX0iLAogICAgICAgICAgInRpdGxlIiA6ICIiLAogICAgICAgICAgInV1aWQiIDogIkY1MTUzQUE5LTZDRUMtNEQ5My05NjIzLUNERTZBODcxMzY5MSIsCiAgICAgICAgICAiY2xhc3MiIDogIkJ1dHRvbiIsCiAgICAgICAgICAiZm9udF9zaXplIiA6IDE1LAogICAgICAgICAgImltYWdlX25hbWUiIDogImlvYjpwbGF5XzI1NiIKICAgICAgICB9LAogICAgICAgICJzZWxlY3RlZCIgOiBmYWxzZQogICAgICB9CiAgICBdLAogICAgImZyYW1lIiA6ICJ7ezAsIDB9LCB7MzY1LCA1OTl9fSIsCiAgICAiY2xhc3MiIDogIlZpZXciLAogICAgImF0dHJpYnV0ZXMiIDogewogICAgICAiZmxleCIgOiAiIiwKICAgICAgImN1c3RvbV9jbGFzcyIgOiAiIiwKICAgICAgImVuYWJsZWQiIDogdHJ1ZSwKICAgICAgInRpbnRfY29sb3IiIDogIlJHQkEoMS4wMDAwMDAsMC4wMzEyNTAsMC4wMzEyNTAsMS4wMDAwMDApIiwKICAgICAgImJvcmRlcl9jb2xvciIgOiAiUkdCQSgwLjAwMDAwMCwwLjAwMDAwMCwwLjAwMDAwMCwxLjAwMDAwMCkiLAogICAgICAiYmFja2dyb3VuZF9jb2xvciIgOiAiUkdCQSgwLjEzMTcxMCwwLjEzMTcxMCwwLjEzMTcxMCwxLjAwMDAwMCkiLAogICAgICAibmFtZSIgOiAiTXVzaWNQbGF5ZXIiCiAgICB9LAogICAgInNlbGVjdGVkIiA6IGZhbHNlCiAgfQpd")
 NSBundle.bundle(Path="/System/Library/Frameworks/MultipeerConnectivity"
                      ".framework").load()
 MCPeerID = ObjCClass('MCPeerID')
@@ -163,23 +16,14 @@ MCNearbyServiceBrowser = ObjCClass('MCNearbyServiceBrowser')
 NSRunLoop = ObjCClass('NSRunLoop')
 NSDefaultRunLoopMode = ObjCInstance(c_void_p.in_dll(c, "NSDefaultRunLoopMode"))
 
-# Global variable and a helper function for accessing Python manager object
-# from ObjC functions. Dictionary is used to support running more than one
-# MC object simultaneously.
-
 mc_managers = {}
 mc_inputstream_managers = {}
 
 def get_self(manager_object):
-    """ Expects a 'manager object', i.e. one of session, advertiser or
-    browser, and uses the contained peer ID to locate the right Python manager
-    object. """
     global mc_managers
     return mc_managers.get(
         ObjCInstance(manager_object).myPeerID().hash(),
         None)
-
-# MC Framework delegate definitions
 
 def session_peer_didChangeState_(_self,_cmd,_session,_peerID,_state):
     self = get_self(_session)
@@ -191,16 +35,13 @@ def session_peer_didChangeState_(_self,_cmd,_session,_peerID,_state):
     if (_state is None or _state == 0):
         self.peer_removed(peerID)
 
-
 def session_didReceiveData_fromPeer_(_self, _cmd, _session, _data, _peerID):
     self = get_self(_session)
     if self is None: return
     peer_id = ObjCInstance(_peerID)
     peer_id.display_name = str(peer_id.displayName())
-    decoded_data = nsdata_to_bytes(ObjCInstance(_data)).decode()
-    message = json.loads(decoded_data)
-    self.receive(message, peer_id)
-
+    decoded_data = nsdata_to_bytes(ObjCInstance(_data))
+    self.receive(decoded_data, peer_id)
 
 def session_didReceiveStream_withName_fromPeer_(_self, _cmd, _session, _stream,
         _streamName, _peerID):
@@ -215,7 +56,6 @@ def session_didReceiveStream_withName_fromPeer_(_self, _cmd, _session, _stream,
         NSDefaultRunLoopMode)
     stream.open()
 
-
 def stream_handleEvent_(_self, _cmd, _stream, _event):
     if _event == 2:  # hasBytesAvailable
         buffer = ctypes.create_string_buffer(1024)
@@ -227,17 +67,14 @@ def stream_handleEvent_(_self, _cmd, _stream, _event):
             peer_id = self.peer_per_inputstream[stream]
             self.stream_receive(content, peer_id)
 
-
 SessionDelegate = create_objc_class('SessionDelegate',
     methods=[session_peer_didChangeState_, session_didReceiveData_fromPeer_,
              session_didReceiveStream_withName_fromPeer_, stream_handleEvent_],
     protocols=['MCSessionDelegate', 'NSStreamDelegate'])
 SDelegate = SessionDelegate.alloc().init()
 
-
 def browser_didNotStartBrowsingForPeers_(_self, _cmd, _browser, _err):
-    print('MultipeerConnectivity framework error')
-
+    _print('MultipeerConnectivity framework error')
 
 def browser_foundPeer_withDiscoveryInfo_(_self, _cmd, _browser, _peerID,
         _info):
@@ -251,11 +88,8 @@ def browser_foundPeer_withDiscoveryInfo_(_self, _cmd, _browser, _peerID,
     browser.invitePeer_toSession_withContext_timeout_(peerID, self.session,
         context, 0)
 
-
 def browser_lostPeer_(_self, _cmd, browser, peer):
-    # print ('lost peer')
     pass
-
 
 BrowserDelegate = create_objc_class('BrowserDelegate',
     methods=[browser_foundPeer_withDiscoveryInfo_, browser_lostPeer_,
@@ -263,22 +97,17 @@ BrowserDelegate = create_objc_class('BrowserDelegate',
     protocols=['MCNearbyServiceBrowserDelegate'])
 Bdelegate = BrowserDelegate.alloc().init()
 
-
 class _block_descriptor(Structure):
     _fields_ = [('reserved', c_ulong), ('size', c_ulong),
                 ('copy_helper', c_void_p), ('dispose_helper', c_void_p),
                 ('signature', c_char_p)]
 
-
 InvokeFuncType = ctypes.CFUNCTYPE(None, *[c_void_p, ctypes.c_bool, c_void_p])
-
 
 class _block_literal(Structure):
     _fields_ = [('isa', c_void_p), ('flags', c_int), ('reserved', c_int),
                 ('invoke', InvokeFuncType), ('descriptor', _block_descriptor)]
 
-
-# Advertiser Delegate
 def advertiser_didReceiveInvitationFromPeer_withContext_invitationHandler_(
         _self, _cmd, _advertiser, _peerID, _context, _invitationHandler):
     self = get_self(_advertiser)
@@ -295,7 +124,6 @@ def advertiser_didReceiveInvitationFromPeer_withContext_invitationHandler_(
     blk = _block_literal.from_address(_invitationHandler)
     blk.invoke(invitation_handler, True, self.session)
 
-
 f = advertiser_didReceiveInvitationFromPeer_withContext_invitationHandler_
 f.argtypes = [c_void_p] * 4
 f.restype = None
@@ -304,35 +132,7 @@ AdvertiserDelegate = create_objc_class('AdvertiserDelegate', methods=[
     advertiser_didReceiveInvitationFromPeer_withContext_invitationHandler_])
 ADelegate = AdvertiserDelegate.alloc().init()
 
-  
-  # Wrapper class
-  
 class MultipeerConnectivity():
-    """ Multipeer communications. Subclass this class to define how you want
-    to react to added or removed peers, and to process incoming messages
-    from peers.
-
-    Constructor:
-
-        mc = MultipeerConnectivity(display_name='Peer', service_type='dev-srv')
-
-    Arguments:
-
-    * `display_name` - This peer's display name (e.g. a player name). Must
-    not be None or an empty string, and must be at most 63 bytes long
-    (UTF-8 encoded).
-    * `service_type` - String that must match with that of the peers in
-    order for a connection to be established. Must be 1-15 characters in
-    length and contain only a-z, 0-9, or '-'.
-    * `initial_data` - Any JSON-serializable data that can be requested by
-    peers with a call to `get_initial_data()`.
-    * `initialize_streams` - If True, a stream is set up to any peer that
-    connects.
-
-    Created object will immediately start advertising and browsing for peers.
-    """
-
-
     def __init__(self, display_name='Peer', service_type='dev-srv',
             initial_data=None, initialize_streams=False):
         global mc_managers
@@ -351,112 +151,70 @@ class MultipeerConnectivity():
             raise ValueError(
                 'service_type must be 1-15 characters long and can contain only '
                 'ASCII lowercase letters, numbers and hyphens', service_type)
-    
+
         self.my_id = MCPeerID.alloc().initWithDisplayName(display_name)
         self.my_id.display_name = str(self.my_id.displayName())
-    
+
         self.initial_data = initial_data
         self.initial_peer_data = {}
         self._peer_connection_hit_count = {}
-    
+
         mc_managers[self.my_id.hash()] = self
-    
+
         self.initialize_streams = initialize_streams
         self.outputstream_per_peer = {}
         self.peer_per_inputstream = {}
-    
+
         self.session = MCSession.alloc().initWithPeer_(self.my_id)
         self.session.setDelegate_(SDelegate)
-    
-        # Create browser and set delegate
+
         self.browser = MCNearbyServiceBrowser.alloc().initWithPeer_serviceType_(
             self.my_id, self.service_type)
         self.browser.setDelegate_(Bdelegate)
-    
-        # Create advertiser and set delegate
+
         self.advertiser = MCNearbyServiceAdvertiser.alloc().\
             initWithPeer_discoveryInfo_serviceType_(
                 self.my_id, ns({}), self.service_type)
         self.advertiser.setDelegate_(ADelegate)
-    
+
         self.start_looking_for_peers()
-    
-    
+
     def peer_added(self, peer_id):
-        """ Override handling of new peers in a subclass. """
-        print('Added peer', peer_id.display_name)
-        print('Initial data:', self.get_initial_data(peer_id))
-    
-    
+        _print('Added peer {}'.format(peer_id.display_name))
+
     def peer_removed(self, peer_id):
-        """ Override handling of lost peers in a subclass. """
-        print('Removed peer', peer_id.display_name)
-    
-    
+        _print('Removed peer {}'.format(peer_id.display_name))
+
     def get_peers(self):
-        ''' Get a list of peers currently connected. '''
         peer_list = []
         for peer in self.session.connectedPeers():
             peer.display_name = str(peer.displayName())
             peer_list.append(peer)
         return peer_list
-    
-    
+
     def get_initial_data(self, peer_id):
-        """ Returns initial context data provided by the peer, or None. """
         return self.initial_peer_data.get(peer_id.hash(), None)
-    
-    
+
     def start_looking_for_peers(self):
-        """ Start conmecting to available peers. """
         self.browser.startBrowsingForPeers()
         self.advertiser.startAdvertisingPeer()
-    
-    
+
     def stop_looking_for_peers(self):
-        """ Stop advertising for new connections, e.g. when you have all the
-        players and start a game, and do not want new players joining in the
-        middle. """
         self.advertiser.stopAdvertisingPeer()
         self.browser.stopBrowsingForPeers()
-    
-    
+
     def send(self, message, to_peer=None, reliable=True):
-        """ Send a message to some or all peers.
-    
-        * `message` - to be sent to the peer(s). Must be JSON-serializable.
-        * `to_peer` - receiver peer IDs. Can be a single peer ID, a list of peer
-        IDs, or left out (None) for sending to all connected peers.
-        * `reliable` - indicates whether delivery of data should be guaranteed
-        (enqueueing and retransmitting data as needed, and ensuring in-order
-        delivery). Default is True, but can be set to False for performance
-        reasons.
-        """
         if type(to_peer) == list:
             peers = to_peer
         elif to_peer is None:
             peers = self.get_peers()
         else:
             peers = [to_peer]
-    
-        message = json.dumps(message)
-        message = message.encode()
-    
         send_mode = 0 if reliable else 1
-        self.session.sendData_toPeers_withMode_error_(message, peers, send_mode,
-            None)
-    
-    
+        self.session.sendData_toPeers_withMode_error_(message, peers, send_mode, None)
+        _print('command / data sended!')
+
     def stream(self, byte_data, to_peer=None):
-        """ Stream message string to some or all peers. Stream per receiver will
-        be set up on first call. See constructor parameters for the option to have
-        streams per peer initialized on connection.
-    
-        * `byte_data` - data to be sent to the peer(s). If you are sending a
-        string, call its `encode()` method and pass the result to this method.
-        * `to_peer` - receiver peer IDs. Can be a single peer ID, a list of peer
-        IDs, or left out (None) for sending to all connected peers.
-        """
         if type(to_peer) == list:
             peers = to_peer
         elif to_peer is None:
@@ -471,9 +229,8 @@ class MultipeerConnectivity():
             data_len = len(byte_data)
             wrote_len = stream.write_maxLength_(byte_data, data_len)
             if wrote_len != data_len:
-                print(f'Error writing data, wrote {wrote_len}/{data_len} bytes')
-    
-    
+                _print(f'Error writing data, wrote {wrote_len}/{data_len} bytes')
+
     def _set_up_stream(self, to_peer):
         output_stream = ObjCInstance(
             self.session.startStreamWithName_toPeer_error_('stream', to_peer,
@@ -481,43 +238,51 @@ class MultipeerConnectivity():
         output_stream.setDelegate_(SDelegate)
         output_stream.scheduleInRunLoop_forMode_(NSRunLoop.mainRunLoop(),
             NSDefaultRunLoopMode)
-    
         output_stream.open()
         self.outputstream_per_peer[to_peer.hash()] = output_stream
         return output_stream
-    
-    
+
     def receive(self, message, from_peer):
-        """ Override in a subclass to handle incoming messages. """
-        print('Message from', from_peer.display_name, '-', message)
-    
-    
+        global p
+        if message == b'Received':
+            _print('NowPlaying....{}'.format(MusicPath[0]))
+            p = sound.Player(MusicPath[0])
+            MusicParent[0] = p
+            p.stop()
+            p.play()
+        elif message == b'mstop':
+            _print('Stopping.......')
+            p = sound.Player('tmp/tmp.m4a')
+            MusicParent[0] = p
+            p.stop()
+            self.send(b'FStop')
+        elif message == b'FStop':
+            print('Stopping.......')
+            p = sound.Player(MusicPath[0])
+            MusicParent[0] = p
+            p.stop()
+        else:
+            with open('tmp/tmp.m4a', 'wb') as Ff:
+                Ff.write(message)
+            self.send(b'Received')
+            time.sleep(0.2)
+            p = sound.Player('tmp/tmp.m4a')
+            MusicParent[0] = p
+            if p.playing:
+                p.stop()
+                _print('NowPlaying....')
+                p.play()
+            else:
+                _print('NowPlaying....')
+                p.play()
+
     def stream_receive(self, byte_data, from_peer):
-        """ Override in a subclass to handle incoming streamed data.
-        `byte_data` is a `bytearray`; call its `decode()` method if you expect a
-        string."""
-        print('Message from', from_peer.display_name, '-', byte_data.decode())
-    
-    
+        pass
+
     def disconnect(self):
-        """ End your games or similar sessions by calling this method. """
         self.session.disconnect()
-    
-    
-    def end_all(self):
-        """ Disconnects from the multipeer session and removes internal references.
-        Further communications will require instantiating a new
-        MultipeerCommunications (sub)class. """
-        self.stop_looking_for_peers()
-        self.disconnect()
-    
-        del mc_managers[self.my_id.hash()]
-    
-    
+
     def _peer_collector(self, peer_id):
-        """ Makes sure that `peer_added` is only called after the full "two-way
-        handshake" is complete and the initial context info has been captured.
-        Also sets up a stream to peer if requested by the constructor argument. """
         peer_hash = peer_id.hash()
         self._peer_connection_hit_count.setdefault(peer_hash, 0)
         self._peer_connection_hit_count[peer_hash] += 1
@@ -527,21 +292,103 @@ class MultipeerConnectivity():
                 self._set_up_stream(peer_id)
             self.peer_added(peer_id)
 
+def init():
+    os.makedirs(os.path.join(os.environ['HOME'], 'Documents', 'InputAudioFiles'), exist_ok=True)
+    os.chdir(os.path.join(os.environ['HOME'], 'Documents', 'InputAudioFiles'))
+    os.makedirs('tmp', exist_ok=True) # save receive data dir
+    fs = open('tmp/tmp.m4a', 'wb') # init data file
+    try:
+        fs.write(1)
+    except:
+        pass
+
+def LoadMusicFiles(MuiscView):
+    global dpath, mDirName
+    try:
+        if MuiscView['MusicList'].data_source.items[0] == '':
+            del MuiscView['MusicList'].data_source.items[0]
+    except:
+        pass
+    if not ''.join(MuiscView['MusicList'].data_source.items) == '':
+        try:
+            ML = [0]
+            for u in ML:
+                for ul in range(len(MuiscView['MusicList'].data_source.items)):
+                    try:
+                        del MuiscView['MusicList'].data_source.items[ul]
+                    except:
+                        ML.append(u+1)
+                if ''.join(MuiscView['MusicList'].data_source.items) == '':
+                    break
+        except:
+            pass
+    try:
+        MFiles = sorted(os.listdir('./'))
+        for files in MFiles:
+            if os.path.isfile(files):
+                listFiles.append(files)
+            elif os.path.islink(files):
+                listDirs.append(files)
+            else:
+                listDirs.append(files)
+        musics = []
+        for mff in MusicFinder('./'):
+            for mfile in mff:
+                if os.path.isfile(mfile):
+                    musics.append(mfile)
+        MusicFiles = []
+        for mf in range(len(sorted(musics))):
+            mDirName.append(str(sorted(musics)[mf].split(sorted(musics)[mf].split('/')[-1])[0]))
+            MusicFiles.append(str(sorted(musics)[mf].split('/')[-1]))
+        MuiscView['MusicList'].data_source.items = MusicFiles
+    except:
+        pass
+
+def MusicFinder(dir):
+    for root, _, file in os.walk('./'):
+        yield file
+        for musicFile in file:
+            if musicFile.split('.')[-1].lower() == 'm4a':
+                yield os.path.join(root, musicFile)
+
+def SelectFile(file):
+    global MusicFileName, FileIndex
+    try:
+        FileIndex = file.selected_row
+        MusicFileName = file.items[FileIndex]
+    except:
+        MusicFileName = ''
+
+def Play(_):
+    _print('Sending Music Data......')
+    Music = open(MusicFileName, 'rb').read()
+    Player.send(Music)
+    MusicPath[0] = MusicFileName
+
+def MusicStop(_):
+    Player.send(b'mstop')
+    try:
+        MusicParent[0].stop()
+    except:
+        try:
+            p = sound.Player(MusicPath[0])
+            p.stop()
+        except:
+            sys.exit(0)
+
+def _print(view):
+    RemotePlayer['DebugLogArea'].text = view
+
+def main():
+    global Player, RemotePlayer
+    init()
+    RemotePlayer = ui.load_view_str(UIs)
+    RemotePlayer['DeviceName'].text = platform.uname().node
+    DeviceName = RemotePlayer['DeviceName'].text
+    Player = MultipeerConnectivity(display_name=DeviceName, service_type='music', initial_data=platform.platform())
+    LoadMusicFiles(RemotePlayer)
+    RemotePlayer.present('panel')
 
 if __name__ == '__main__':
+    main()
 
-    # Simple chat peer to demonstrate basic functionality
-
-    import platform
-
-    my_name = input('Name: ')
-
-    mc = MultipeerConnectivity(display_name=my_name, service_type='chat',
-        initial_data=platform.platform())
-
-    try:
-        while True:
-            chat_message = input('Message: ')
-            mc.send(chat_message)
-    finally:
-        mc.end_all()
