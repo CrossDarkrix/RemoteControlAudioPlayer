@@ -265,7 +265,7 @@ class MultipeerConnectivity():
             with open('tmp/tmp.m4a', 'wb') as Ff:
                 Ff.write(message)
             self.send(b'Received')
-            time.sleep(0.2)
+            time.sleep(0.08)
             p = sound.Player('tmp/tmp.m4a')
             MusicParent[0] = p
             if p.playing:
