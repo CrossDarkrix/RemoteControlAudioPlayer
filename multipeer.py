@@ -390,6 +390,7 @@ def _print(view):
 def main():
     global Player, RemotePlayer
     init()
+    time.sleep(0.3)
     RemotePlayer = ui.load_view_str(UIs)
     RemotePlayer['DeviceName'].text = platform.uname().node
     DeviceName = RemotePlayer['DeviceName'].text
@@ -399,3 +400,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
