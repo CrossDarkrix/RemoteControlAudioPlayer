@@ -260,6 +260,7 @@ class MultipeerConnectivity():
             p.stop()
             p.play()
             PlayDetect[0] = '1'
+            ReceiveM[0] = b''
         elif message == b'mstop':
             ReceiveM[0] = message
             _print('Stopping.......')
@@ -274,6 +275,7 @@ class MultipeerConnectivity():
             MusicParent[0] = p
             p.stop()
         else:
+            ReceiveM[0] = message
             with open('tmp/tmp.m4a', 'wb') as Ff:
                 Ff.write(message)
             self.send(b'Received')
@@ -284,10 +286,12 @@ class MultipeerConnectivity():
                 p.stop()
                 _print('NowPlaying....')
                 p.play()
+                ReceiveM[0] = b''
                 PlayDetect[0] = '1'
             else:
                 _print('NowPlaying....')
                 p.play()
+                ReceiveM[0] = b''
                 PlayDetect[0] = '1'
 
     def stream_receive(self, byte_data, from_peer):
@@ -407,7 +411,6 @@ def RepeatLoop(MBytes):
             if P.playing and not ReceiveM[0] == b'Received' and PlayDetect[0] == '1':
                 StopResending[0] = '0'
                 PlayDetect[0] = '0'
-                ReceiveM[0] = b''
             elif not P.playing and not ReceiveM[0] == b'Received' and PlayDetect[0] == '0' and StopResending[0] == '0':
                 Player.send(MusicData[0])
                 StopResending[0] = '1'
