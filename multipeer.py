@@ -10,6 +10,9 @@ RepeatDetect = ['0']
 StopResending = ['0']
 ReceiveM = [b'']
 MusicData = [b'']
+PlayDetect =['0']
+LoopBreak = [False]
+
 UIs = base64.b64decode("WwogIHsKICAgICJub2RlcyIgOiBbCiAgICAgIHsKICAgICAgICAibm9kZXMiIDogWwoKICAgICAgICBdLAogICAgICAgICJmcmFtZSIgOiAie3syMSwgOTh9LCB7MzI1LCAyOTh9fSIsCiAgICAgICAgImNsYXNzIiA6ICJUYWJsZVZpZXciLAogICAgICAgICJhdHRyaWJ1dGVzIiA6IHsKICAgICAgICAgICJ1dWlkIiA6ICI5OTg5N0QyQy02MDkzLTRFOEMtQkJBOC00OTMxRTQwMUE2RkYiLAogICAgICAgICAgImRhdGFfc291cmNlX2FjdGlvbiIgOiAiU2VsZWN0RmlsZSIsCiAgICAgICAgICAiYmFja2dyb3VuZF9jb2xvciIgOiAiUkdCQSgwLjEyOTMwOCwwLjEyOTMwOCwwLjEyOTMwOCwxLjAwMDAwMCkiLAogICAgICAgICAgImZyYW1lIiA6ICJ7ezgzLCAxODN9LCB7MjAwLCAyMDB9fSIsCiAgICAgICAgICAiZGF0YV9zb3VyY2VfaXRlbXMiIDogIiIsCiAgICAgICAgICAidGludF9jb2xvciIgOiAiUkdCQSgxLjAwMDAwMCwwLjAzMTI1MCwwLjAzMTI1MCwxLjAwMDAwMCkiLAogICAgICAgICAgImRhdGFfc291cmNlX251bWJlcl9vZl9saW5lcyIgOiAxLAogICAgICAgICAgImRhdGFfc291cmNlX2RlbGV0ZV9lbmFibGVkIiA6IGZhbHNlLAogICAgICAgICAgImRhdGFfc291cmNlX2ZvbnRfc2l6ZSIgOiAxOCwKICAgICAgICAgICJyb3dfaGVpZ2h0IiA6IDQ0LAogICAgICAgICAgImNsYXNzIiA6ICJUYWJsZVZpZXciLAogICAgICAgICAgIm5hbWUiIDogIk11c2ljTGlzdCIsCiAgICAgICAgICAiZmxleCIgOiAiV0hMUlRCIgogICAgICAgIH0sCiAgICAgICAgInNlbGVjdGVkIiA6IGZhbHNlCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibm9kZXMiIDogWwoKICAgICAgICBdLAogICAgICAgICJmcmFtZSIgOiAie3syMSwgMzg5fSwgezMyNSwgNDd9fSIsCiAgICAgICAgImNsYXNzIiA6ICJUZXh0VmlldyIsCiAgICAgICAgImF0dHJpYnV0ZXMiIDogewogICAgICAgICAgInV1aWQiIDogIjk1QjAzNEY1LTIwOTItNDBFQS04MjU5LTNFMjU1RjM4ODMyNiIsCiAgICAgICAgICAiZm9udF9zaXplIiA6IDE3LAogICAgICAgICAgImNvcm5lcl9yYWRpdXMiIDogMSwKICAgICAgICAgICJiYWNrZ3JvdW5kX2NvbG9yIiA6ICJSR0JBKDAuMDg2MDY4LDAuMDg2MDY4LDAuMDg2MDY4LDEuMDAwMDAwKSIsCiAgICAgICAgICAiZnJhbWUiIDogInt7ODMsIDE4M30sIHsyMDAsIDIwMH19IiwKICAgICAgICAgICJib3JkZXJfY29sb3IiIDogIlJHQkEoMC4wMDAwMDAsMC4wMDAwMDAsMC4wMDAwMDAsMS4wMDAwMDApIiwKICAgICAgICAgICJlZGl0YWJsZSIgOiBmYWxzZSwKICAgICAgICAgICJib3JkZXJfd2lkdGgiIDogMSwKICAgICAgICAgICJ0aW50X2NvbG9yIiA6ICJSR0JBKDEuMDAwMDAwLDAuMDMxMjUwLDAuMDMxMjUwLDEuMDAwMDAwKSIsCiAgICAgICAgICAiYWxpZ25tZW50IiA6ICJsZWZ0IiwKICAgICAgICAgICJhdXRvY29ycmVjdGlvbl90eXBlIiA6ICJkZWZhdWx0IiwKICAgICAgICAgICJhbHBoYSIgOiAxLAogICAgICAgICAgInRleHRfY29sb3IiIDogIlJHQkEoMS4wMDAwMDAsMC4wMzEyNTAsMC4wMzEyNTAsMS4wMDAwMDApIiwKICAgICAgICAgICJmb250X25hbWUiIDogIjxTeXN0ZW0+IiwKICAgICAgICAgICJzcGVsbGNoZWNraW5nX3R5cGUiIDogImRlZmF1bHQiLAogICAgICAgICAgImNsYXNzIiA6ICJUZXh0VmlldyIsCiAgICAgICAgICAibmFtZSIgOiAiRGVidWdMb2dBcmVhIiwKICAgICAgICAgICJmbGV4IiA6ICJXSExSVEIiCiAgICAgICAgfSwKICAgICAgICAic2VsZWN0ZWQiIDogZmFsc2UKICAgICAgfSwKICAgICAgewogICAgICAgICJub2RlcyIgOiBbCgogICAgICAgIF0sCiAgICAgICAgImZyYW1lIiA6ICJ7ezI1MCwgNDQ0fSwgezgwLCA4NH19IiwKICAgICAgICAiY2xhc3MiIDogIkJ1dHRvbiIsCiAgICAgICAgImF0dHJpYnV0ZXMiIDogewogICAgICAgICAgImZsZXgiIDogIldITFJUQiIsCiAgICAgICAgICAiYWN0aW9uIiA6ICJNdXNpY1N0b3AiLAogICAgICAgICAgImltYWdlX25hbWUiIDogImlvYjpzdG9wXzI1NiIsCiAgICAgICAgICAiZnJhbWUiIDogInt7MTQzLCAyODR9LCB7ODAsIDMyfX0iLAogICAgICAgICAgInRpdGxlIiA6ICIiLAogICAgICAgICAgInV1aWQiIDogIkY1MTUzQUE5LTZDRUMtNEQ5My05NjIzLUNERTZBODcxMzY5MSIsCiAgICAgICAgICAiY2xhc3MiIDogIkJ1dHRvbiIsCiAgICAgICAgICAiZm9udF9zaXplIiA6IDE1LAogICAgICAgICAgIm5hbWUiIDogIlN0b3AiCiAgICAgICAgfSwKICAgICAgICAic2VsZWN0ZWQiIDogZmFsc2UKICAgICAgfSwKICAgICAgewogICAgICAgICJub2RlcyIgOiBbCgogICAgICAgIF0sCiAgICAgICAgImZyYW1lIiA6ICJ7ezM1LCA0NDR9LCB7ODAsIDg0fX0iLAogICAgICAgICJjbGFzcyIgOiAiQnV0dG9uIiwKICAgICAgICAiYXR0cmlidXRlcyIgOiB7CiAgICAgICAgICAiZmxleCIgOiAiV0hMUlRCIiwKICAgICAgICAgICJhY3Rpb24iIDogIlBsYXkiLAogICAgICAgICAgIm5hbWUiIDogIlBsYXkiLAogICAgICAgICAgImZyYW1lIiA6ICJ7ezE0MywgMjg0fSwgezgwLCAzMn19IiwKICAgICAgICAgICJ0aXRsZSIgOiAiIiwKICAgICAgICAgICJ1dWlkIiA6ICJGNTE1M0FBOS02Q0VDLTREOTMtOTYyMy1DREU2QTg3MTM2OTEiLAogICAgICAgICAgImNsYXNzIiA6ICJCdXR0b24iLAogICAgICAgICAgImZvbnRfc2l6ZSIgOiAxNSwKICAgICAgICAgICJpbWFnZV9uYW1lIiA6ICJpb2I6cGxheV8yNTYiCiAgICAgICAgfSwKICAgICAgICAic2VsZWN0ZWQiIDogZmFsc2UKICAgICAgfSwKICAgICAgewogICAgICAgICJub2RlcyIgOiBbCgogICAgICAgIF0sCiAgICAgICAgImZyYW1lIiA6ICJ7ezIxLCA2fSwgezg0LCA4NH19IiwKICAgICAgICAiY2xhc3MiIDogIkJ1dHRvbiIsCiAgICAgICAgImF0dHJpYnV0ZXMiIDogewogICAgICAgICAgImZsZXgiIDogIldITFJUQiIsCiAgICAgICAgICAiYWN0aW9uIiA6ICJDbG9zZSIsCiAgICAgICAgICAiaW1hZ2VfbmFtZSIgOiAiaW9iOmNsb3NlX3JvdW5kXzI1NiIsCiAgICAgICAgICAiZnJhbWUiIDogInt7MTQzLCAyODR9LCB7ODAsIDMyfX0iLAogICAgICAgICAgInRpdGxlIiA6ICIiLAogICAgICAgICAgInV1aWQiIDogIkY1MTUzQUE5LTZDRUMtNEQ5My05NjIzLUNERTZBODcxMzY5MSIsCiAgICAgICAgICAiY2xhc3MiIDogIkJ1dHRvbiIsCiAgICAgICAgICAibmFtZSIgOiAiQ2xvc2UiLAogICAgICAgICAgImZvbnRfc2l6ZSIgOiAxNQogICAgICAgIH0sCiAgICAgICAgInNlbGVjdGVkIiA6IGZhbHNlCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibm9kZXMiIDogWwoKICAgICAgICBdLAogICAgICAgICJmcmFtZSIgOiAie3sxNDUsIDQ0NH0sIHs4MCwgODR9fSIsCiAgICAgICAgImNsYXNzIiA6ICJCdXR0b24iLAogICAgICAgICJhdHRyaWJ1dGVzIiA6IHsKICAgICAgICAgICJmbGV4IiA6ICJXSExSVEIiLAogICAgICAgICAgImFjdGlvbiIgOiAiUmVwZWF0IiwKICAgICAgICAgICJpbWFnZV9uYW1lIiA6ICJpb2I6aW9zN19yZWZyZXNoX2VtcHR5XzI1NiIsCiAgICAgICAgICAiZnJhbWUiIDogInt7MTQzLCAyODR9LCB7ODAsIDMyfX0iLAogICAgICAgICAgInRpdGxlIiA6ICIiLAogICAgICAgICAgInV1aWQiIDogIkY1MTUzQUE5LTZDRUMtNEQ5My05NjIzLUNERTZBODcxMzY5MSIsCiAgICAgICAgICAiY2xhc3MiIDogIkJ1dHRvbiIsCiAgICAgICAgICAibmFtZSIgOiAiUmVwZWF0IiwKICAgICAgICAgICJmb250X3NpemUiIDogMTUKICAgICAgICB9LAogICAgICAgICJzZWxlY3RlZCIgOiB0cnVlCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibm9kZXMiIDogWwoKICAgICAgICBdLAogICAgICAgICJmcmFtZSIgOiAie3szNSwgNTM2fSwgezgwLCAzMn19IiwKICAgICAgICAiY2xhc3MiIDogIkxhYmVsIiwKICAgICAgICAiYXR0cmlidXRlcyIgOiB7CiAgICAgICAgICAibmFtZSIgOiAiIiwKICAgICAgICAgICJ0ZXh0X2NvbG9yIiA6ICJSR0JBKDEuMDAwMDAwLDAuMDMxMjUwLDAuMDMxMjUwLDEuMDAwMDAwKSIsCiAgICAgICAgICAiZmxleCIgOiAiV0hMUlRCIiwKICAgICAgICAgICJmcmFtZSIgOiAie3sxMDgsIDI4NH0sIHsxNTAsIDMyfX0iLAogICAgICAgICAgInV1aWQiIDogIjQ0REUzQjI5LUI3QzYtNEUxOS1CRDM3LUQyOTE2MTQxOUMxMiIsCiAgICAgICAgICAiY2xhc3MiIDogIkxhYmVsIiwKICAgICAgICAgICJhbGlnbm1lbnQiIDogImNlbnRlciIsCiAgICAgICAgICAidGV4dCIgOiAiUGxheSIsCiAgICAgICAgICAiZm9udF9zaXplIiA6IDE4LAogICAgICAgICAgImZvbnRfbmFtZSIgOiAiPFN5c3RlbT4iCiAgICAgICAgfSwKICAgICAgICAic2VsZWN0ZWQiIDogZmFsc2UKICAgICAgfSwKICAgICAgewogICAgICAgICJub2RlcyIgOiBbCgogICAgICAgIF0sCiAgICAgICAgImZyYW1lIiA6ICJ7ezEyMywgNTM2fSwgezExOSwgMzJ9fSIsCiAgICAgICAgImNsYXNzIiA6ICJMYWJlbCIsCiAgICAgICAgImF0dHJpYnV0ZXMiIDogewogICAgICAgICAgImZsZXgiIDogIldITFJUQiIsCiAgICAgICAgICAiZm9udF9zaXplIiA6IDE4LAogICAgICAgICAgImZvbnRfbmFtZSIgOiAiPFN5c3RlbT4iLAogICAgICAgICAgImZyYW1lIiA6ICJ7ezEwOCwgMjg0fSwgezE1MCwgMzJ9fSIsCiAgICAgICAgICAidXVpZCIgOiAiNDRERTNCMjktQjdDNi00RTE5LUJEMzctRDI5MTYxNDE5QzEyIiwKICAgICAgICAgICJjbGFzcyIgOiAiTGFiZWwiLAogICAgICAgICAgImFsaWdubWVudCIgOiAiY2VudGVyIiwKICAgICAgICAgICJ0ZXh0IiA6ICJSZXBlYXQiLAogICAgICAgICAgIm5hbWUiIDogIiIsCiAgICAgICAgICAidGV4dF9jb2xvciIgOiAiUkdCQSgxLjAwMDAwMCwwLjAzMTI1MCwwLjAzMTI1MCwxLjAwMDAwMCkiCiAgICAgICAgfSwKICAgICAgICAic2VsZWN0ZWQiIDogZmFsc2UKICAgICAgfSwKICAgICAgewogICAgICAgICJub2RlcyIgOiBbCgogICAgICAgIF0sCiAgICAgICAgImZyYW1lIiA6ICJ7ezI1MCwgNTM2fSwgezgwLCAzMn19IiwKICAgICAgICAiY2xhc3MiIDogIkxhYmVsIiwKICAgICAgICAiYXR0cmlidXRlcyIgOiB7CiAgICAgICAgICAiZmxleCIgOiAiV0hMUlRCIiwKICAgICAgICAgICJmb250X3NpemUiIDogMTgsCiAgICAgICAgICAiZm9udF9uYW1lIiA6ICI8U3lzdGVtPiIsCiAgICAgICAgICAiZnJhbWUiIDogInt7MTA4LCAyODR9LCB7MTUwLCAzMn19IiwKICAgICAgICAgICJ1dWlkIiA6ICI0NERFM0IyOS1CN0M2LTRFMTktQkQzNy1EMjkxNjE0MTlDMTIiLAogICAgICAgICAgImNsYXNzIiA6ICJMYWJlbCIsCiAgICAgICAgICAiYWxpZ25tZW50IiA6ICJjZW50ZXIiLAogICAgICAgICAgInRleHQiIDogIlN0b3AiLAogICAgICAgICAgIm5hbWUiIDogIiIsCiAgICAgICAgICAidGV4dF9jb2xvciIgOiAiUkdCQSgxLjAwMDAwMCwwLjAzMTI1MCwwLjAzMTI1MCwxLjAwMDAwMCkiCiAgICAgICAgfSwKICAgICAgICAic2VsZWN0ZWQiIDogZmFsc2UKICAgICAgfQogICAgXSwKICAgICJmcmFtZSIgOiAie3swLCAwfSwgezM2NSwgNTk5fX0iLAogICAgImNsYXNzIiA6ICJWaWV3IiwKICAgICJhdHRyaWJ1dGVzIiA6IHsKICAgICAgImZsZXgiIDogIiIsCiAgICAgICJjdXN0b21fY2xhc3MiIDogIiIsCiAgICAgICJlbmFibGVkIiA6IHRydWUsCiAgICAgICJ0aW50X2NvbG9yIiA6ICJSR0JBKDEuMDAwMDAwLDAuMDMxMjUwLDAuMDMxMjUwLDEuMDAwMDAwKSIsCiAgICAgICJib3JkZXJfY29sb3IiIDogIlJHQkEoMC4wMDAwMDAsMC4wMDAwMDAsMC4wMDAwMDAsMS4wMDAwMDApIiwKICAgICAgImJhY2tncm91bmRfY29sb3IiIDogIlJHQkEoMC4xMzE3MTAsMC4xMzE3MTAsMC4xMzE3MTAsMS4wMDAwMDApIiwKICAgICAgIm5hbWUiIDogIk11c2ljUGxheWVyIgogICAgfSwKICAgICJzZWxlY3RlZCIgOiBmYWxzZQogIH0KXQ==")
 NSBundle.bundle(Path="/System/Library/Frameworks/MultipeerConnectivity"
                      ".framework").load()
@@ -256,6 +259,7 @@ class MultipeerConnectivity():
             MusicParent[0] = p
             p.stop()
             p.play()
+            PlayDetect[0] = '1'
         elif message == b'mstop':
             ReceiveM[0] = message
             _print('Stopping.......')
@@ -280,9 +284,11 @@ class MultipeerConnectivity():
                 p.stop()
                 _print('NowPlaying....')
                 p.play()
+                PlayDetect[0] = '1'
             else:
                 _print('NowPlaying....')
                 p.play()
+                PlayDetect[0] = '1'
 
     def stream_receive(self, byte_data, from_peer):
         pass
@@ -373,45 +379,71 @@ def SelectFile(file):
         MusicFileName = ''
 
 def RepeatLoop(MBytes):
-    PlayRepeat = True
-    while PlayRepeat:
-        MusicData[0] = MBytes
+    try:
+        P = p
+    except:
+        P = sound.Player(MusicPath[0])
+    if P.playing:
+        if not MBytes == b'':
+            MusicData[0] = MBytes
+        P.stop()
+        Player.send(b'mstop')
+    else:
+       PlayDetect[0] = '0'
+    while True:
+        if LoopBreak[0]:
+            break
         try:
             P = p
         except:
             P = sound.Player(MusicPath[0])
         if RepeatDetect[0] == '0':
-            PlayRepeat = False
+            break
         try:
-            if P.playing:
+            if P.playing and not ReceiveM[0] == b'Received' and PlayDetect[0] == '1':
                 StopResending[0] = '0'
-            elif StopResending[0] == '0':
+                PlayDetect[0] = '0'
+            elif not P.playing and not ReceiveM[0] == b'Received' and PlayDetect[0] == '0' and StopResending[0] == '0':
                 Player.send(MusicData[0])
                 StopResending[0] = '1'
         except:
             pass
-        if ReceiveM[0] == b'mstop':
-            PlayRepeat = False
-            continue
-        if ReceiveM[0] == b'FStop':
-            PlayRepeat = False
-            continue
 
 class LoopRepeatThread(threading.Thread):
     def __init__(self, Music):
-        threading.Thread.__init__(self)
+        super().__init__()
+        self.started = threading.Event()
         self.Music = Music
+        self.alive = True
+
+    def __del__(self):
+        self.kill()
+
+    def kill(self):
+        self.started.set()
+        self.alive = False
+        self.started.clear()
 
     def run(self):
         RepeatLoop(self.Music)
 
 def Play(_):
     if RepeatDetect[0] == '1':
+        PlayDetect[0] = '0'
+        StopResending[0] = '0'
         _print('ReSending Music Data......')
         Music = open(MusicFileName, 'rb').read()
-        MusicPath[0] = MusicFileName
+        MusicData[0] = Music
         LoopMusic = LoopRepeatThread(Music)
+        MusicPath[0] = MusicFileName
+        try:
+            LoopMusic.kill()
+            LoopBreak[0] = True
+            Player.send(b'mstop')
+        except:
+            pass
         LoopMusic.setDaemon(True)
+        LoopBreak[0] = False
         LoopMusic.start()
     elif RepeatDetect[0] == '0':
         _print('Sending Music Data......')
@@ -420,10 +452,14 @@ def Play(_):
         Player.send(Music)
 
 def Close(_):
+    LoopBreak[0] = True
     Player.end_all()
 
 def MusicStop(_):
     Player.send(b'mstop')
+    PlayDetect[0] = '0'
+    LoopBreak[0] = True
+    MusicData[0] = b''
     try:
         MusicParent[0].stop()
     except:
