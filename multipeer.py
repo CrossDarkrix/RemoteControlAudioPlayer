@@ -393,19 +393,31 @@ def RepeatLoop(MBytes):
     while True:
         if LoopBreak[0]:
             break
+        else:
+            pass
         try:
             P = p
         except:
             P = sound.Player(MusicPath[0])
         if RepeatDetect[0] == '0':
             break
+        else:
+            pass
         try:
             if P.playing and not ReceiveM[0] == b'Received' and PlayDetect[0] == '1':
                 StopResending[0] = '0'
                 PlayDetect[0] = '0'
+                ReceiveM[0] = b''
             elif not P.playing and not ReceiveM[0] == b'Received' and PlayDetect[0] == '0' and StopResending[0] == '0':
                 Player.send(MusicData[0])
                 StopResending[0] = '1'
+            elif not P.playing and StopResending[0] == '0' and PlayDetect[0] == '0':
+                P.stop()
+                Player.send(b'mstop')
+                Player.send(MusicData[0])
+                StopResending[0] = '1'
+            else:
+                pass
         except:
             pass
 
