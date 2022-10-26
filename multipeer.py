@@ -16,6 +16,7 @@ MCNearbyServiceBrowser = ObjCClass('MCNearbyServiceBrowser')
 NSRunLoop = ObjCClass('NSRunLoop')
 NSDefaultRunLoopMode = ObjCInstance(c_void_p.in_dll(c, "NSDefaultRunLoopMode"))
 
+MCSession.stringForMCSessionSendDataMode_(1)
 mc_managers = {}
 mc_inputstream_managers = {}
 
@@ -57,7 +58,7 @@ def session_didReceiveStream_withName_fromPeer_(_self, _cmd, _session, _stream,
     stream.open()
 
 def stream_handleEvent_(_self, _cmd, _stream, _event):
-    if _event == 2:  # hasBytesAvailable
+    if _event == 2:
         buffer = ctypes.create_string_buffer(1024)
         stream = ObjCInstance(_stream)
         read_len = stream.read_maxLength_(buffer, 1024)
@@ -300,8 +301,8 @@ class MultipeerConnectivity():
 def init():
     os.makedirs(os.path.join(os.environ['HOME'], 'Documents', 'InputAudioFiles'), exist_ok=True)
     os.chdir(os.path.join(os.environ['HOME'], 'Documents', 'InputAudioFiles'))
-    os.makedirs('tmp', exist_ok=True) # save receive data dir
-    fs = open('tmp/tmp.m4a', 'wb') # init data file
+    os.makedirs('tmp', exist_ok=True)
+    fs = open('tmp/tmp.m4a', 'wb')
     try:
         fs.write(1)
     except:
@@ -400,4 +401,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
