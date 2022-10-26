@@ -373,9 +373,9 @@ def SelectFile(file):
         MusicFileName = ''
 
 def RepeatLoop(MBytes):
-    MusicData[0] = MBytes
     PlayRepeat = True
     while PlayRepeat:
+        MusicData[0] = MBytes
         try:
             P = p
         except:
