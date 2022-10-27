@@ -324,6 +324,7 @@ class MultipeerConnectivity():
         self.stop_looking_for_peers()
         self.disconnect()
         RemotePlayer.close()
+        sys.exit(0)
 
     def _peer_collector(self, peer_id):
         peer_hash = peer_id.hash()
@@ -428,6 +429,10 @@ def RepeatLoop(MBytes):
         else:
             pass
         try:
+            if P.playing:
+                time.sleep(5)
+            else:
+                time.sleep(1)
             if P.playing and not ReceiveM[0] == b'Received' and PlayDetect[0] == '1':
                 StopResending[0] = '0'
                 PlayDetect[0] = '0'
@@ -452,7 +457,10 @@ class LoopRepeatThread(threading.Thread):
         self.alive = True
 
     def __del__(self):
-        self.kill()
+        try:
+            self.kill()
+        except:
+            pass
 
     def kill(self):
         self.started.set()
@@ -498,7 +506,10 @@ class SeekbarThread(threading.Thread):
         self.alive = True
 
     def __del__(self):
-        self.kill()
+        try:
+            self.kill()
+        except:
+            pass
 
     def kill(self):
         self.started.set()
@@ -516,7 +527,12 @@ class SeekbarThread(threading.Thread):
                 P = sound.Player(MusicPath[0])
             try:
                 RemotePlayer['seekbar'].value = int(str(P.current_time).split('.')[0]) /  int(str(P.duration).split('.')[0])
+                if P.playing:
+                    time.sleep(1)
+                else:
+                    time.sleep(0.3)
             except:
+                time.sleep(0.3)
                 pass
 
 def Close(_):
