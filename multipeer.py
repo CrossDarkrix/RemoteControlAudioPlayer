@@ -226,7 +226,10 @@ class MultipeerConnectivity():
             peers = [to_peer]
         send_mode = 0 if reliable else 1
         self.session.sendData_toPeers_withMode_error_(message, peers, send_mode, None)
-        _print('command / data sended!')
+        if b'Volume' in message:
+            _print('Volume Setting Mode!\nPlease ReTry Play Button!')
+        else:
+            _print('command / data sended!')
 
     def stream(self, byte_data, to_peer=None):
         if type(to_peer) == list:
@@ -258,15 +261,15 @@ class MultipeerConnectivity():
 
     def receive(self, message, from_peer):
         global p
-        Seekbar = SeekbarThread()
-        Seekbar.setDaemon(True)
-        seekbarThreadList.append(Seekbar)
         try:
             if message.decode().split(',')[0] == 'Volume':
                ClientSetVolume(float(message.decode(errors='ignore').split(',')[1]))
         except:
-            pass
+            _print('')
         if message == b'Received':
+            Seekbar = SeekbarThread()
+            Seekbar.setDaemon(True)
+            seekbarThreadList.append(Seekbar)
             ReceiveM[0] = message
             _print('NowPlaying....{}'.format(MusicPath[0]))
             p = sound.Player(MusicPath[0])
@@ -296,31 +299,67 @@ class MultipeerConnectivity():
             MusicParent[0] = p
             p.stop()
         else:
-            ReceiveM[0] = message
-            with open('tmp/tmp.m4a', 'wb') as Ff:
-                Ff.write(message)
-            self.send(b'Received')
-            time.sleep(0.08)
-            p = sound.Player('tmp/tmp.m4a')
-            MusicParent[0] = p
             try:
-                NowClosed[0] = '1'
-                Seekbar.kill()
+                if not message.decode().split(',')[0] == 'Volume':
+                    Seekbar = SeekbarThread()
+                    Seekbar.setDaemon(True)
+                    seekbarThreadList.append(Seekbar)
+                    ReceiveM[0] = message
+                    with open('tmp/tmp.m4a', 'wb') as Ff:
+                        Ff.write(message)
+                    self.send(b'Received')
+                    time.sleep(0.08)
+                    p = sound.Player('tmp/tmp.m4a')
+                    MusicParent[0] = p
+                    try:
+                        NowClosed[0] = '1'
+                        Seekbar.kill()
+                    except:
+                        pass
+                    NowClosed[0] = '0'
+                    Seekbar.start()
+                    if p.playing:
+                        p.stop()
+                        _print('NowPlaying....')
+                        p.play()
+                        ReceiveM[0] = b''
+                        PlayDetect[0] = '1'
+                    else:
+                        _print('NowPlaying....')
+                        p.play()
+                        ReceiveM[0] = b''
+                        PlayDetect[0] = '1'
+                else:
+                    _print('Volume Setting Mode!\nPlease ReTry Play Button!')
             except:
-                pass
-            NowClosed[0] = '0'
-            Seekbar.start()
-            if p.playing:
-                p.stop()
-                _print('NowPlaying....')
-                p.play()
-                ReceiveM[0] = b''
-                PlayDetect[0] = '1'
-            else:
-                _print('NowPlaying....')
-                p.play()
-                ReceiveM[0] = b''
-                PlayDetect[0] = '1'
+                Seekbar = SeekbarThread()
+                Seekbar.setDaemon(True)
+                seekbarThreadList.append(Seekbar)
+                ReceiveM[0] = message
+                with open('tmp/tmp.m4a', 'wb') as Ff:
+                    Ff.write(message)
+                self.send(b'Received')
+                time.sleep(0.08)
+                p = sound.Player('tmp/tmp.m4a')
+                MusicParent[0] = p
+                try:
+                    NowClosed[0] = '1'
+                    Seekbar.kill()
+                except:
+                    pass
+                NowClosed[0] = '0'
+                Seekbar.start()
+                if p.playing:
+                    p.stop()
+                    _print('NowPlaying....')
+                    p.play()
+                    ReceiveM[0] = b''
+                    PlayDetect[0] = '1'
+                else:
+                    _print('NowPlaying....')
+                    p.play()
+                    ReceiveM[0] = b''
+                    PlayDetect[0] = '1'
 
     def stream_receive(self, byte_data, from_peer):
         pass
@@ -491,16 +530,17 @@ def Play(_):
             Player.send('Volume,{}'.format(round(Control[0][0].value(), 2)).encode('utf-8'))
             CheckSync[0] = '0'
             RemotePlayer['SyncVolmume'].value = 0
-        try:
-            LoopMusic.kill()
-            LoopBreak[0] = True
-            Player.send(b'mstop')
-        except:
-            pass
-        LoopMusic.setDaemon(True)
-        LoopBreak[0] = False
-        LoopMusic.start()
-        RepeatThread.append(LoopMusic)
+        else:
+            try:
+                LoopMusic.kill()
+                LoopBreak[0] = True
+                Player.send(b'mstop')
+            except:
+                pass
+            LoopMusic.setDaemon(True)
+            LoopBreak[0] = False
+            LoopMusic.start()
+            RepeatThread.append(LoopMusic)
     elif RepeatDetect[0] == '0':
         _print('Sending Music Data......')
         Music = open(MusicFileName, 'rb').read()
@@ -509,11 +549,12 @@ def Play(_):
             Player.send('Volume,{}'.format(round(Control[0][0].value(), 2)).encode('utf-8'))
             CheckSync[0] = '0'
             RemotePlayer['SyncVolmume'].value = 0
-        try:
-            Player.send(b'mstop')
-        except:
-            pass
-        Player.send(Music)
+        else:
+            try:
+                Player.send(b'mstop')
+            except:
+                pass
+            Player.send(Music)
 
 class SeekbarThread(threading.Thread):
     def __init__(self):

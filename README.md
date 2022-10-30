@@ -16,3 +16,11 @@ bluetooth), without going through some server.
 run ```multipeer.py```.
 
 add M4A files to ```$HOME/InputAudioFiles```.
+
+## Player Mode
+
+Sync Volume Mode(No Playing Music): Volume Sync + Play Button Press.
+
+Repeat Mode: Repeat Button Press & Play Button Press.
+
+Normal Mode: Play Button Press.
