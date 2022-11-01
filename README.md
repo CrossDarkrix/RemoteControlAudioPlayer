@@ -15,7 +15,7 @@ bluetooth), without going through some server.
 
 run ```multipeer.py```.
 
-add M4A files to ```$HOME/InputAudioFiles```.
+add M4A & FLAC files to ```$HOME/InputAudioFiles```.
 
 ## Player Mode
 
